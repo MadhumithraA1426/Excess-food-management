@@ -29,8 +29,8 @@ A simple web application to manage and share excess food donations using Flask f
 ### 1. Clone the repository
 
 ```
-git clone your_repo_url.git
-cd your_repo_folder
+git clone https://github.com/MadhumithraA1426/Excess-food-management.git
+cd Excess-food-management
 ```
 
 ### 2. Create and activate Python virtual environment
