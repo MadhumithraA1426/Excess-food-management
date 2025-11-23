@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Available Foods{% endblock %}
+{% block content %}
+
+<h1>Available Excess Food Near You</h1>
+
+<form method="GET" action="{{ url_for('user_page') }}" style="margin-bottom: 24px;">
+    <input
+        type="text"
+        name="location"
+        placeholder="Search by location"
+        value="{{ search_location }}"
+        style="padding: 8px; width: 300px; font-size:1rem;"
+    />
+    <button type="submit" style="padding: 8px 14px; font-weight: 500; cursor: pointer;">Search</button>
+    {% if search_location %}
+        <a href="{{ url_for('user_page') }}" style="margin-left: 12px; font-weight: normal; font-size: 0.9rem;">Clear</a>
+    {% endif %}
+</form>
+
+{% if foods %}
+    <ul>
+    {% for food in foods %}
+        <li>
+            <strong>{{ food.food_name }}</strong> | Qty: {{ food.quantity }} | Location: {{ food.location }} | Donor: {{ food.donor_name }} | Contact: {{ food.contact_phone }} | Expiry: {{ food.expiry_timestamp }}
+        </li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>No foods available at the moment.</p>
+{% endif %}
+
+{% endblock %}
