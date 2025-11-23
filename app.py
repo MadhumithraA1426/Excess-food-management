@@ -5,10 +5,10 @@ from datetime import datetime
 import os
 from dotenv import load_dotenv
 
-load_dotenv()  # Load .env variables
+load_dotenv()  # Load environment variables from .env
 
 app = Flask(__name__)
-app.secret_key = os.getenv("SECRET_KEY", "fallback_insecure_key")  # Use SECRET_KEY from .env or fallback
+app.secret_key = os.getenv("SECRET_KEY", "fallback_insecure_key")  # Load SECRET_KEY from env or fallback
 
 @app.before_request
 def before_request_func():
