@@ -2,21 +2,21 @@ from flask import Flask, render_template, request, redirect, url_for, session, f
 from db import (get_donor_by_email, create_donor, add_food, get_foods_for_donor,
                 get_available_foods, get_available_foods_by_location, delete_expired_foods, delete_food_by_id)
 from datetime import datetime
+import os
+from dotenv import load_dotenv
 
+load_dotenv()  # Load .env variables
 
 app = Flask(__name__)
-app.secret_key = "supersecretkey"  # Change this securely in production
-
+app.secret_key = os.getenv("SECRET_KEY", "fallback_insecure_key")  # Use SECRET_KEY from .env or fallback
 
 @app.before_request
 def before_request_func():
     delete_expired_foods()
 
-
 @app.route("/")
 def home():
     return redirect(url_for("user_page"))
-
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -32,7 +32,6 @@ def login():
         else:
             flash("Invalid email or password", "danger")
     return render_template("login.html")
-
 
 @app.route("/signup", methods=["GET", "POST"])
 def signup():
@@ -51,7 +50,6 @@ def signup():
                 flash("Account created, please login", "success")
                 return redirect(url_for("login"))
     return render_template("login.html")
-
 
 @app.route("/donor", methods=["GET", "POST"])
 def donor_page():
@@ -87,7 +85,6 @@ def donor_page():
     foods = get_foods_for_donor(donor["id"])
     return render_template("donor.html", donor=donor, foods=foods)
 
-
 @app.route("/donor/delete/<int:food_id>", methods=["POST"])
 def donor_delete_food(food_id):
     if not session.get("logged_in") or session.get("role") != "donor":
@@ -104,7 +101,6 @@ def donor_delete_food(food_id):
 
     return redirect(url_for("donor_page"))
 
-
 @app.route("/user")
 def user_page():
     search_location = request.args.get("location", "").strip()
@@ -120,12 +116,10 @@ def user_page():
         search_location=search_location,
     )
 
-
 @app.route("/logout")
 def logout():
     session.clear()
     return redirect(url_for("user_page"))
-
 
 if __name__ == "__main__":
     app.run(debug=True)
