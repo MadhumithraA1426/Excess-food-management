@@ -3,8 +3,17 @@ import path from "path";
 
 sqlite3.verbose();
 
-const dbPath = path.join(__dirname, "..", "data.sqlite");
-export const db = new sqlite3.Database(dbPath);
+const dbPath = process.env.NODE_ENV === 'production' 
+  ? '/tmp/data.sqlite'  // Render: read-only filesystem, use /tmp
+  : path.join(__dirname, "..", "data.sqlite");  // Local dev
+
+export const db = new sqlite3.Database(dbPath, (err) => {
+  if (err) {
+    console.error('Database connection error:', err.message);
+  } else {
+    console.log(`Connected to SQLite database at: ${dbPath}`);
+  }
+});
 
 // Initialize tables
 db.serialize(() => {
@@ -16,7 +25,9 @@ db.serialize(() => {
       password_hash TEXT NOT NULL,
       role TEXT NOT NULL CHECK (role IN ('donor','user'))
     )
-  `);
+  `, (err) => {
+    if (err) console.error('Users table error:', err.message);
+  });
 
   db.run(`
     CREATE TABLE IF NOT EXISTS foods (
@@ -30,7 +41,20 @@ db.serialize(() => {
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY (donor_id) REFERENCES users(id)
     )
-  `);
+  `, (err) => {
+    if (err) console.error('Foods table error:', err.message);
+  });
+});
+
+// Graceful shutdown
+process.on('SIGINT', () => {
+  db.close((err) => {
+    if (err) {
+      console.error(err.message);
+    }
+    console.log('Database connection closed.');
+    process.exit(0);
+  });
 });
 
 export function run(sql: string, params: any[] = []): Promise<void> {
